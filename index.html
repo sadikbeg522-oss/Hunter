@@ -4,6 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>Hunter</title>
+<link rel="manifest" href="./manifest.json" />
+<meta name="theme-color" content="#0B0D12" />
+<link rel="icon" href="./icon-192.png" />
+<link rel="apple-touch-icon" href="./icon-192.png" />
 <style>
   html, body { margin: 0; padding: 0; background: #0B0D12; height: 100%; overscroll-behavior: none; }
   #root { min-height: 100vh; }
@@ -48,6 +52,9 @@
 
   (async function () {
     try {
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js").catch(function () {});
+      }
       var res = await fetch("./app.jsx");
       if (!res.ok) { showBootError("Could not load app.jsx", "HTTP status: " + res.status); return; }
       var code = await res.text();
