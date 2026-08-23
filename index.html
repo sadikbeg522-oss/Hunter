@@ -7,6 +7,14 @@
 <style>
   html, body { margin: 0; padding: 0; background: #0B0D12; height: 100%; overscroll-behavior: none; }
   #root { min-height: 100vh; }
+  #boot-status {
+    position: fixed; inset: 0; background: #0B0D12; color: #EDEEF3;
+    font-family: system-ui, sans-serif; padding: 20px; box-sizing: border-box;
+    font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+    overflow-y: auto; z-index: 9999;
+  }
+  #boot-status.hidden { display: none; }
+  #boot-status .err { color: #FF6B6B; font-family: monospace; font-size: 12px; margin-top: 12px; }
 </style>
 <script type="importmap">
 {
@@ -18,10 +26,47 @@
   }
 }
 </script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel" data-type="module" data-presets="react" src="./app.jsx"></script>
+<div id="boot-status">Loading Hunter…</div>
+
+<script>
+  window.addEventListener("error", function (e) {
+    showBootError("Script error", e.message + "\n" + (e.filename || "") + ":" + (e.lineno || ""));
+  });
+  window.addEventListener("unhandledrejection", function (e) {
+    showBootError("Unhandled promise rejection", (e.reason && e.reason.stack) || String(e.reason));
+  });
+  function showBootError(title, detail) {
+    var el = document.getElementById("boot-status");
+    el.classList.remove("hidden");
+    el.innerHTML = "<b>" + title + "</b><div class='err'></div>";
+    el.querySelector(".err").textContent = detail;
+  }
+
+  (async function () {
+    try {
+      var res = await fetch("./app.jsx");
+      if (!res.ok) { showBootError("Could not load app.jsx", "HTTP status: " + res.status); return; }
+      var code = await res.text();
+
+      var out = Babel.transform(code, {
+        presets: ["react"],
+        filename: "app.jsx",
+        sourceType: "module",
+      }).code;
+
+      var blob = new Blob([out], { type: "text/javascript" });
+      var url = URL.createObjectURL(blob);
+      await import(/* @vite-ignore */ url);
+
+      document.getElementById("boot-status").classList.add("hidden");
+    } catch (err) {
+      showBootError("Failed to start app", (err && err.stack) || String(err));
+    }
+  })();
+</script>
 </body>
 </html>
