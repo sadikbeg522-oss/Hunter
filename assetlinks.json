@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.sadikbeg522_oss.twa",
+        "sha256_cert_fingerprints": ["04:E6:74:80:B1:2B:06:6E:E7:E9:80:94:5F:5B:3A:48:A1:75:27:94:82:5A:94:C2:F9:A0:53:D7:A4:25:56:C3"]
+      }
+    }]
